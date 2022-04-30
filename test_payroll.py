@@ -191,12 +191,12 @@ class TestWorkHoursWage(unittest.TestCase):
         self.daytime_wage = WorkHoursWage(time_start=time(hour=9, minute=0), time_end=time(hour=17, minute=0),
                                           amount=15)
 
-    def get_wage_45(self):
+    def test_get_wage_45(self):
         wage = self.daytime_wage.get_wage(time_start=time(hour=9, minute=0), time_end=time(hour=12, minute=0))
         self.assertEqual(45, wage)
 
-    def get_wage_zero(self):
-        wage = self.daytime_wage.get_wage(time_start=time(hour=20, minute=0), time_end=time(hour=0, minute=0))
+    def test_get_wage_zero(self):
+        wage = self.daytime_wage.get_wage(time_start=time(hour=20, minute=0), time_end=time(hour=20, minute=1))
         self.assertEqual(0, wage)
 
 

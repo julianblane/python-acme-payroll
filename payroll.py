@@ -90,7 +90,22 @@ class WorkHoursWage(WorkHours):
         :param time_end: schedule end
         :return: amount of money
         """
-        pass
+        if time_end == time(hour=0, minute=0):
+            # shift 1 minute back to keep time in same day
+            time_end = time(hour=23, minute=59)
+        if time_start > time_end:
+            raise ValueError("Invalid time range")
+
+        hours_worked = 0
+        if time_end > self.time_start and time_start < self.time_end:
+            clamp_time_start = datetime.combine(datetime.today(), max(self.time_start, time_start))
+            clamp_time_end = datetime.combine(datetime.today(), min(self.time_end, time_end))
+
+            # add an extra minute to account for schedules ending at midnight
+            seconds_worked = (clamp_time_end - clamp_time_start).seconds + 60
+            hours_worked = int(seconds_worked / 3600)
+
+        return hours_worked * self.amount
 
 
 class PayRate:
