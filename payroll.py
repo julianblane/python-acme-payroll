@@ -221,7 +221,7 @@ class Payroll:
             raise ValueError('payroll rates are missing days')
 
         self.rates = rates
-        self.employee_schedules = []
+        self.employee_schedules: list[EmployeeSchedule] = []
 
     def add_employee_schedule(self, schedule: EmployeeSchedule):
         """
@@ -240,4 +240,14 @@ class Payroll:
 
         :returns: tuple of employee-salary tuples
         """
-        pass
+        payroll = []
+
+        for employee in self.employee_schedules:
+            salary = 0
+            for work_hours in employee.work_hours:
+                for rate in self.rates:
+                    salary += rate.calculate_salary(work_hours)
+
+            payroll.append((employee.name, salary))
+
+        return tuple(payroll)

@@ -67,7 +67,6 @@ class TestPayroll(unittest.TestCase):
     def test_get_employees_payroll(self):
         payroll_wages = self.payroll.get_employees_payroll()
 
-        self.assertIs(payroll_wages, tuple[tuple[str, int]])
         self.assertEqual(2, len(payroll_wages))
         self.assertIn(('MONICA', 90), payroll_wages)
         self.assertIn(('DIANE', 230), payroll_wages)
