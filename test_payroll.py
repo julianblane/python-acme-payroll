@@ -1,7 +1,7 @@
 import unittest
 from datetime import time
 
-from payroll import Payroll, PayRate, DayRange, WorkHoursWage, EmployeeSchedule, WeekdayWorkHours
+from payroll import Payroll, PayRate, DayRange, WorkHours, WorkHoursWage, EmployeeSchedule, WeekdayWorkHours
 
 
 class TestPayroll(unittest.TestCase):
@@ -67,7 +67,8 @@ class TestPayroll(unittest.TestCase):
     def test_get_employees_payroll(self):
         payroll_wages = self.payroll.get_employees_payroll()
 
-        self.assertEqual(len(payroll_wages), 2)
+        self.assertIs(payroll_wages, tuple[tuple[str, int]])
+        self.assertEqual(2, len(payroll_wages))
         self.assertIn(('MONICA', 90), payroll_wages)
         self.assertIn(('DIANE', 230), payroll_wages)
 
@@ -96,8 +97,8 @@ class TestEmployeeSchedule(unittest.TestCase):
         ]
         schedule = EmployeeSchedule('MARTIN', work_hours=work_hours)
 
-        self.assertEqual(schedule.name, 'MARTIN')
-        self.assertEqual(schedule.work_hours, work_hours)
+        self.assertEqual('MARTIN', schedule.name)
+        self.assertEqual(work_hours, schedule.work_hours)
 
     def test_create_error_overlapping_hours(self):
         """create schedule with overlapping hours"""
@@ -114,13 +115,49 @@ class TestDayRange(unittest.TestCase):
 
     def test_create_success(self):
         """tests day_start < day_end"""
-        dayrange = DayRange(0, 2)
-        self.assertEqual(dayrange.weekday_start, 0)
-        self.assertEqual(dayrange.weekday_end, 2)
+        day_range = DayRange(0, 2)
+        self.assertEqual(0, day_range.weekday_start)
+        self.assertEqual(2, day_range.weekday_end)
 
     def test_create_error_negative_day_range(self):
         """tests day_start > day_end"""
         self.assertRaises(ValueError, DayRange, weekday_start=3, weekday_end=2)
+
+
+class TestWorkHoursCreation(unittest.TestCase):
+    """tests workhours initialization"""
+    def test_create_edge_case_day_end(self):
+        """create workhours that end at midnight"""
+        time_start = time(hour=22, minute=0)
+        time_end = time(hour=00, minute=0)
+        work_hours = WorkHours(
+            time_start=time_start,
+            time_end=time_end,
+        )
+
+        self.assertEqual(time_start, work_hours.time_start)
+        # assert time_end gets shifted a minute back
+        self.assertEqual(time(hour=23, minute=59), work_hours.time_end)
+
+    def test_create_edge_case_day_start(self):
+        """create workhours that start a minute later than midnight"""
+        time_start = time(hour=00, minute=1)
+        time_end = time(hour=12, minute=0)
+        hourly_wage = WorkHours(
+            time_start=time_start,
+            time_end=time_end,
+        )
+
+        # assert the missing minute gets included
+        self.assertEqual(time(hour=00, minute=00), hourly_wage.time_start)
+        self.assertEqual(time_end, hourly_wage.time_end)
+
+    def test_create_error_invalid_timerange(self):
+        """time_start > time_end"""
+        time_start = time(hour=19, minute=0)
+        time_end = time(hour=14, minute=0)
+
+        self.assertRaises(ValueError, WorkHours, time_start=time_start, time_end=time_end)
 
 
 class TestWorkHoursWageCreation(unittest.TestCase):
@@ -135,42 +172,9 @@ class TestWorkHoursWageCreation(unittest.TestCase):
             amount=30
         )
 
-        self.assertEqual(hourly_wage.time_start, time_start)
-        self.assertEqual(hourly_wage.time_end, time_end)
-        self.assertEqual(hourly_wage.amount, 30)
-
-    def test_create_edge_case_day_end(self):
-        time_start = time(hour=22, minute=0)
-        time_end = time(hour=00, minute=0)
-        hourly_wage = WorkHoursWage(
-            time_start=time_start,
-            time_end=time_end,
-            amount=12
-        )
-
-        self.assertEqual(hourly_wage.time_start, time_start)
-        self.assertEqual(hourly_wage.time_end, time(hour=23, minute=59))
-        self.assertEqual(hourly_wage.amount, 12)
-
-    def test_create_edge_case_day_start(self):
-        time_start = time(hour=00, minute=1)
-        time_end = time(hour=12, minute=0)
-        hourly_wage = WorkHoursWage(
-            time_start=time_start,
-            time_end=time_end,
-            amount=19
-        )
-
-        self.assertEqual(hourly_wage.time_start, time(hour=00, minute=00))
-        self.assertEqual(hourly_wage.time_end, time_end)
-        self.assertEqual(hourly_wage.amount, 19)
-
-    def test_create_error_invalid_timerange(self):
-        """time_start > time_end"""
-        time_start = time(hour=19, minute=0)
-        time_end = time(hour=14, minute=0)
-
-        self.assertRaises(ValueError, WorkHoursWage, time_start=time_start, time_end=time_end, amount=30)
+        self.assertEqual(time_start, hourly_wage.time_start)
+        self.assertEqual(time_end, hourly_wage.time_end)
+        self.assertEqual(30, hourly_wage.amount)
 
     def test_create_error_invalid_amount(self):
         """amount < 0"""
@@ -189,11 +193,11 @@ class TestWorkHoursWage(unittest.TestCase):
 
     def get_wage_45(self):
         wage = self.daytime_wage.get_wage(time_start=time(hour=9, minute=0), time_end=time(hour=12, minute=0))
-        self.assertEqual(wage, 45)
+        self.assertEqual(45, wage)
 
     def get_wage_zero(self):
         wage = self.daytime_wage.get_wage(time_start=time(hour=20, minute=0), time_end=time(hour=0, minute=0))
-        self.assertEqual(wage, 0)
+        self.assertEqual(0, wage)
 
 
 class TestWeekdayWorkHours(unittest.TestCase):
@@ -205,9 +209,9 @@ class TestWeekdayWorkHours(unittest.TestCase):
 
         work_hours = WeekdayWorkHours(weekday=1, time_start=time_start, time_end=time_end)
 
-        self.assertEqual(work_hours.weekday, 1)
-        self.assertEqual(work_hours.time_start, time_start)
-        self.assertEqual(work_hours.weekday, time_end)
+        self.assertEqual(1, work_hours.weekday)
+        self.assertEqual(time_start, work_hours.time_start)
+        self.assertEqual(time_end, work_hours.time_end)
 
     def test_create_error_invalid_day(self):
         """invalid day number"""
@@ -217,13 +221,49 @@ class TestWeekdayWorkHours(unittest.TestCase):
         self.assertRaises(ValueError, WeekdayWorkHours, weekday=7, time_start=time_start, time_end=time_end)
 
 
+class TestPayRateCreation(unittest.TestCase):
+    """test payrate initialization"""
+    def test_create_success(self):
+        """successful init"""
+        day_range = DayRange(0, 0)
+        hourly_wages = [
+            WorkHoursWage(time_start=time(hour=0, minute=1), time_end=time(hour=19, minute=00), amount=20),
+            WorkHoursWage(time_start=time(hour=19, minute=1), time_end=time(hour=00, minute=00), amount=15),
+        ]
+
+        pay_rate = PayRate(day_range=day_range, hourly_wages=hourly_wages)
+
+        self.assertEqual(day_range, pay_rate.day_range)
+        self.assertEqual(hourly_wages, pay_rate.hourly_wages)
+
+    def test_create_overlapping(self):
+        """payrate with overlapping hours"""
+        day_range = DayRange(0, 0)
+        hourly_wages = [
+            WorkHoursWage(time_start=time(hour=0, minute=1), time_end=time(hour=16, minute=00), amount=20),
+            WorkHoursWage(time_start=time(hour=8, minute=1), time_end=time(hour=00, minute=00), amount=15),
+        ]
+
+        self.assertRaises(ValueError, PayRate, day_range=day_range, hourly_wages=hourly_wages)
+
+    def test_create_incomplete(self):
+        """payrate with missing hours"""
+        day_range = DayRange(0, 0)
+        hourly_wages = [
+            WorkHoursWage(time_start=time(hour=0, minute=1), time_end=time(hour=10, minute=00), amount=20),
+            WorkHoursWage(time_start=time(hour=14, minute=1), time_end=time(hour=00, minute=00), amount=15),
+        ]
+
+        self.assertRaises(ValueError, PayRate, day_range=day_range, hourly_wages=hourly_wages)
+
+
 class TestWeekdayPayRates(unittest.TestCase):
     def setUp(self) -> None:
         """setup weekdays PayRate"""
         day_range = DayRange(0, 4)
         hourly_wages = [
-            WorkHoursWage(time_start=time(hour=2, minute=1), time_end=time(hour=16, minute=00), amount=20),
-            WorkHoursWage(time_start=time(hour=16, minute=1), time_end=time(hour=22, minute=00), amount=15),
+            WorkHoursWage(time_start=time(hour=0, minute=1), time_end=time(hour=16, minute=00), amount=20),
+            WorkHoursWage(time_start=time(hour=16, minute=1), time_end=time(hour=00, minute=00), amount=15),
         ]
 
         self.weekdays_payrate = PayRate(day_range=day_range, hourly_wages=hourly_wages)
@@ -232,13 +272,13 @@ class TestWeekdayPayRates(unittest.TestCase):
         """weekday work hours"""
         schedule = WeekdayWorkHours(weekday=1, time_start=time(hour=8, minute=0), time_end=time(hour=20, minute=0))
         salary = self.weekdays_payrate.calculate_salary(schedule)
-        self.assertEqual(salary, 220)
+        self.assertEqual(220, salary)
 
     def test_get_salary_zero(self):
         """weekend work hours"""
         schedule = WeekdayWorkHours(weekday=6, time_start=time(hour=8, minute=0), time_end=time(hour=10, minute=0))
         salary = self.weekdays_payrate.calculate_salary(schedule)
-        self.assertEqual(salary, 0)
+        self.assertEqual(0, salary)
 
 
 if __name__ == '__main__':
