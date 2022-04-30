@@ -219,7 +219,10 @@ class Payroll:
 
         :param schedule: employee schedule
         """
-        pass
+        if any([employee.name == schedule.name for employee in self.employee_schedules]):
+            raise ValueError('employee already added to payroll')
+
+        self.employee_schedules.append(schedule)
 
     def get_employees_payroll(self) -> tuple[tuple[str, int], ...]:
         """
