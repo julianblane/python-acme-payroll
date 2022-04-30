@@ -276,7 +276,7 @@ class TestWeekdayPayRates(unittest.TestCase):
 
     def test_get_salary_zero(self):
         """weekend work hours"""
-        schedule = WeekdayWorkHours(weekday=6, time_start=time(hour=8, minute=0), time_end=time(hour=10, minute=0))
+        schedule = WeekdayWorkHours(weekday=6, time_start=time(hour=8, minute=0), time_end=time(hour=8, minute=1))
         salary = self.weekdays_payrate.calculate_salary(schedule)
         self.assertEqual(0, salary)
 

@@ -153,7 +153,11 @@ class PayRate:
         :param schedule: worked days and hours
         :return: amount of money
         """
-        pass
+        salary = 0
+        for hourly_wage in self.hourly_wages:
+            salary += hourly_wage.get_wage(schedule.time_start, schedule.time_end)
+
+        return salary
 
 
 class EmployeeSchedule:
@@ -210,6 +214,11 @@ class Payroll:
         self.employee_schedules = []
 
     def add_employee_schedule(self, schedule: EmployeeSchedule):
+        """
+        adds employee schedule to payroll
+
+        :param schedule: employee schedule
+        """
         pass
 
     def get_employees_payroll(self) -> tuple[tuple[str, int], ...]:
