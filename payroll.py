@@ -21,6 +21,15 @@ class DayRange:
         self.weekday_start = weekday_start
         self.weekday_end = weekday_end
 
+    def contains(self, weekday):
+        """
+        check if the day range contains a certain week day
+
+        :param weekday: day of the week
+        :return: is it contained by the range
+        """
+        return weekday in range(self.weekday_start, self.weekday_end + 1)
+
 
 class WorkHours:
     """Time range"""
@@ -154,8 +163,9 @@ class PayRate:
         :return: amount of money
         """
         salary = 0
-        for hourly_wage in self.hourly_wages:
-            salary += hourly_wage.get_wage(schedule.time_start, schedule.time_end)
+        if self.day_range.contains(schedule.weekday):
+            for hourly_wage in self.hourly_wages:
+                salary += hourly_wage.get_wage(schedule.time_start, schedule.time_end)
 
         return salary
 
