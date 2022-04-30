@@ -98,9 +98,10 @@ class PayRate:
 
     def __init__(self, day_range: DayRange, hourly_wages: list[WorkHoursWage]):
         """
+        Create payrate defined by dayrange and hourly wages in those days
 
-        :param day_range:
-        :param hourly_wages:
+        :param day_range: positive dayrange
+        :param hourly_wages: wages per hour covering all 24hs
         """
 
         # order hourly wages
@@ -172,6 +173,9 @@ class Payroll:
 
         :param rates: list of payrates
         """
+        # order rates by weekday
+        rates.sort(key=lambda r: r.day_range.weekday_start)
+
         # check rates cover all 7 days
         last_day = 0
         for rate in rates:
@@ -182,7 +186,9 @@ class Payroll:
             elif last_day > rate.day_range.weekday_start:
                 raise ValueError('payroll rates have overlapping days')
 
-        if last_day != 6:
+            last_day = rate.day_range.weekday_end + 1
+
+        if last_day != 7:
             raise ValueError('payroll rates are missing days')
 
         self.rates = rates
@@ -196,12 +202,5 @@ class Payroll:
         calculates employees salaries
 
         :returns: tuple of employee-salary tuples
-        """
-
-    def timetable_is_full(self) -> bool:
-        """
-        Checks if the payroll defines wages for the whole week
-
-        :return: if the timetable is complete
         """
         pass
