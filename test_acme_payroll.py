@@ -1,7 +1,8 @@
 import unittest
 from datetime import time
+from io import StringIO
 
-from acme_payroll import parse_employee_schedule
+from acme_payroll import parse_employee_schedule, parse_employees_schedules_from_txt
 from payroll import WeekdayWorkHours
 
 
@@ -43,3 +44,17 @@ class TestAcmePayroll(unittest.TestCase):
         """invalid time range"""
         data_line = 'TIFFANY=WE10:00-18:00,WE16:00-20:00'
         self.assertRaises(ValueError, parse_employee_schedule, data_line=data_line)
+
+    def test_parse_employees_schedules_from_txt_success(self):
+        """load txt"""
+        file_data = StringIO('NORM=FR17:00-21:00,SA17:00-22:00\nLARRY=TH06:00-08:00,TH19:00-21:00')
+
+        schedules_parse = parse_employees_schedules_from_txt(file_data, min_lines=2)
+
+        self.assertEqual(True, any(schedule.name == 'NORM' for schedule in schedules_parse))
+        self.assertEqual(True, any(schedule.name == 'LARRY' for schedule in schedules_parse))
+
+    def test_parse_employees_schedules_from_txt_error_not_enough_data(self):
+        """load incomplete txt"""
+        file_data = StringIO('NORM=FR17:00-21:00,SA17:00-22:00\nLARRY=TH06:00-08:00,TH19:00-21:00')
+        self.assertRaises(ValueError, parse_employees_schedules_from_txt, file=file_data, min_lines=5)
