@@ -1,3 +1,4 @@
+import calendar
 from datetime import time, timedelta, datetime
 
 
@@ -71,6 +72,14 @@ class WeekdayWorkHours(WorkHours):
             raise ValueError('weekday out of the range 0 - 6')
 
         self.weekday = weekday
+
+    def __eq__(self, other):
+        return self.weekday == other.weekday and \
+               self.time_start == other.time_start and \
+               self.time_end == other.time_end
+
+    def __repr__(self):
+        return f'{calendar.day_name[self.weekday]}:{self.time_start:"%H:%M"}-{self.time_end:"%H:%M"}'
 
 
 class WorkHoursWage(WorkHours):
@@ -192,6 +201,8 @@ class EmployeeSchedule:
         self.name = name
         self.work_hours = work_hours
 
+    def __repr__(self):
+        return f'{self.name}={self.work_hours}'
 
 class Payroll:
     """Payrates and employee schedules"""
