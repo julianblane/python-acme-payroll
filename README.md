@@ -20,6 +20,8 @@ Implementation was test-driven, working with the supplied use cases along new da
 After implementation, I did exploratory testing to further test coverage.
 
 ## How to run
+Its only requirement is Python 3.
+
 Its input is a txt file containing at least 5 employee schedules.<br>
 To run, supply the filename as a command-line argument.
 ```
