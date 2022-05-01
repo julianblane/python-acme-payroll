@@ -1,9 +1,9 @@
-import datetime
+from datetime import time, datetime
 import sys
 from io import StringIO
 from typing import TextIO
 
-from payroll import EmployeeSchedule, WeekdayWorkHours
+from payroll import EmployeeSchedule, WeekdayWorkHours, DayRange, WorkHoursWage, PayRate, Payroll
 
 WEEKDAYS = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']
 TIME_FORMAT = '%H:%M'
@@ -35,12 +35,12 @@ def parse_employee_schedule(data_line: str) -> EmployeeSchedule:
             raise ValueError(f'Invalid time range: {time_range_string}')
 
         try:
-            time_start = datetime.datetime.strptime(time_start_string, TIME_FORMAT).time()
+            time_start = datetime.strptime(time_start_string, TIME_FORMAT).time()
         except ValueError:
             raise ValueError(f'Invalid time format: {time_start_string}')
 
         try:
-            time_end = datetime.datetime.strptime(time_end_string, TIME_FORMAT).time()
+            time_end = datetime.strptime(time_end_string, TIME_FORMAT).time()
         except ValueError:
             raise ValueError(f'Invalid time format: {time_end_string}')
 
@@ -55,9 +55,66 @@ def parse_employee_schedule(data_line: str) -> EmployeeSchedule:
 
 
 def parse_employees_schedules_from_txt(file: TextIO, min_lines: int):
+    """
+    loads txt and parses each line into an EmployeeSchedule
+
+    :param file: file to load
+    :param min_lines: minimum amount of lines expected
+    :return: a list of EmployeeSchedules
+    """
     data_lines = file.readlines()
 
     if len(data_lines) < min_lines:
         raise ValueError(f'Insufficient data, supply at least {min_lines} sets of data - supplied {len(data_lines)}')
 
     return [parse_employee_schedule(data_line) for data_line in data_lines]
+
+
+def set_up_payroll():
+    weekdays = DayRange(0, 4)
+    weekend = DayRange(5, 6)
+
+    weekdays_wage = [
+        WorkHoursWage(time_start=time(hour=0, minute=1), time_end=time(hour=9), amount=25),
+        WorkHoursWage(time_start=time(hour=9, minute=1), time_end=time(hour=18), amount=15),
+        WorkHoursWage(time_start=time(hour=18, minute=1), time_end=time(), amount=20)
+    ]
+    weekend_wage = [
+        WorkHoursWage(time_start=time(hour=0, minute=1), time_end=time(hour=9), amount=30),
+        WorkHoursWage(time_start=time(hour=9, minute=1), time_end=time(hour=18), amount=20),
+        WorkHoursWage(time_start=time(hour=18, minute=1), time_end=time(), amount=25)
+    ]
+
+    pay_rates = [
+        PayRate(day_range=weekdays, hourly_wages=weekdays_wage),
+        PayRate(day_range=weekend, hourly_wages=weekend_wage)
+    ]
+
+    return Payroll(rates=pay_rates)
+
+
+if __name__ == '__main__':
+
+    # load schedules from file
+    schedules: list[EmployeeSchedule] = None
+    try:
+        with open(sys.argv[1], 'r') as data_file:
+            schedules = parse_employees_schedules_from_txt(data_file, min_lines=5)
+    except IndexError:
+        print('File argument not supplied')
+    except FileNotFoundError:
+        print(f'File {sys.argv[1]} does not exist')
+
+    if schedules:
+        payroll = set_up_payroll()
+
+        # add schedules to payroll
+        for schedule in schedules:
+            payroll.add_employee_schedule(schedule)
+
+        # get salaries
+        salaries = payroll.get_employees_payroll()
+
+        # print salaries
+        for salary in salaries:
+            print(f'The amount to pay {salary[0]} is: {salary[1]} USD')
