@@ -204,6 +204,7 @@ class EmployeeSchedule:
     def __repr__(self):
         return f'{self.name}={self.work_hours}'
 
+
 class Payroll:
     """Payrates and employee schedules"""
 
@@ -241,7 +242,7 @@ class Payroll:
         :param schedule: employee schedule
         """
         if any([employee.name == schedule.name for employee in self.employee_schedules]):
-            raise ValueError('employee already added to payroll')
+            raise ValueError('found duplicated employee in payroll')
 
         self.employee_schedules.append(schedule)
 
