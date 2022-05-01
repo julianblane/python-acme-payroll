@@ -1,35 +1,45 @@
 import unittest
+from datetime import time
+
+from acme_payroll import parse_employee_schedule
+from payroll import WeekdayWorkHours
 
 
 class TestAcmePayroll(unittest.TestCase):
-    """test schedules load and payroll outputs"""
-    def setUp(self) -> None:
-        pass
+    """test schedules load"""
 
     def test_parse_employee_schedule(self):
         """successful parse"""
-        raise NotImplementedError
+        data_line = 'SUSAN=MO08:00-16:00,TU09:00-18:00,WE15:00-20:00,SA09:00-15:00'
+        employee_schedule = parse_employee_schedule(data_line)
+
+        work_hours = [
+            WeekdayWorkHours(weekday=0, time_start=time(hour=8), time_end=time(hour=16)),
+            WeekdayWorkHours(weekday=1, time_start=time(hour=9), time_end=time(hour=18)),
+            WeekdayWorkHours(weekday=2, time_start=time(hour=15), time_end=time(hour=20)),
+            WeekdayWorkHours(weekday=5, time_start=time(hour=9), time_end=time(hour=15))
+        ]
+
+        self.assertEqual('SUSAN', employee_schedule.name)
+        for work_period in work_hours:
+            self.assertIn(work_period, employee_schedule.work_hours)
 
     def test_parse_employee_schedule_invalid_format(self):
         """invalid format"""
-        raise NotImplementedError
+        data_line = 'JOSEPH=MO08:00-16:00TU09:00-18:00'
+        self.assertRaises(ValueError, parse_employee_schedule, data_line=data_line)
 
     def test_parse_employee_schedule_invalid_day(self):
         """invalid data"""
-        raise NotImplementedError
+        data_line = 'JULIAN=LU08:00-16:00,MA09:00-18:00'
+        self.assertRaises(ValueError, parse_employee_schedule, data_line=data_line)
 
     def test_parse_employee_schedule_invalid_time(self):
         """invalid time input"""
-        raise NotImplementedError
+        data_line = 'KEVIN=WE10:00-06:00,TH09:00-18:00'
+        self.assertRaises(ValueError, parse_employee_schedule, data_line=data_line)
 
     def test_parse_employee_schedule_invalid_schedule(self):
         """invalid time range"""
-        raise NotImplementedError
-
-    def test_parse_schedules(self):
-        """successful schedules parse"""
-        raise NotImplementedError
-
-    def test_parse_schedules_invalid_format(self):
-        """invalid schedule input"""
-        raise NotImplementedError
+        data_line = 'TIFFANY=WE10:00-18:00,WE16:00-20:00'
+        self.assertRaises(ValueError, parse_employee_schedule, data_line=data_line)
