@@ -30,6 +30,11 @@ class TestAcmePayroll(unittest.TestCase):
         data_line = 'JOSEPH=MO08:00-16:00TU09:00-18:00'
         self.assertRaises(ValueError, parse_employee_schedule, data_line=data_line)
 
+    def test_parse_employee_schedule_invalid_format_name_divider(self):
+        """invalid time range"""
+        data_line = 'LISAWE10:00-13:00,WE14:00-18:00'
+        self.assertRaises(ValueError, parse_employee_schedule, data_line=data_line)
+
     def test_parse_employee_schedule_invalid_day(self):
         """invalid data"""
         data_line = 'JULIAN=LU08:00-16:00,MA09:00-18:00'
