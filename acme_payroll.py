@@ -11,7 +11,7 @@ TIME_FORMAT = '%H:%M'
 
 def parse_employee_schedule(data_line: str) -> EmployeeSchedule:
     """
-    Parses employee schedule data line into EmployeeSchedule objets
+    Parses employee schedule data line into a EmployeeSchedule
 
     :param data_line:
     :return: EmployeeSchedule
@@ -57,7 +57,7 @@ def parse_employee_schedule(data_line: str) -> EmployeeSchedule:
 
 def parse_employees_schedules_from_txt(file: TextIO, min_lines: int) -> list[EmployeeSchedule]:
     """
-    loads txt and parses each line into an EmployeeSchedule
+    Parses each line into an EmployeeSchedule
 
     :param file: file to load
     :param min_lines: minimum amount of lines expected
@@ -103,7 +103,7 @@ def set_up_payroll() -> Payroll:
 
 def print_payroll_from_file(filename: str):
     """
-    parses file into schedules, adds them to payroll and prints it
+    Parses employee schedules file, prints payroll
 
     :param filename: schedules filename
     """

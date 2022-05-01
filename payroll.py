@@ -3,11 +3,11 @@ from datetime import time, timedelta, datetime
 
 
 class DayRange:
-    """Weekday range"""
+    """Weekday range, defined by inclusive start and end days"""
 
     def __init__(self, weekday_start: int, weekday_end: int):
         """
-        weekday range, 0 = monday, 6 = sunday
+        Weekday range, 0 = monday, 6 = sunday
 
         :param weekday_start: inclusive
         :param weekday_end: inclusive
@@ -24,7 +24,7 @@ class DayRange:
 
     def contains(self, weekday):
         """
-        check if the day range contains a certain week day
+        Check if the day range contains a certain week day
 
         :param weekday: day of the week
         :return: is it contained by the range
@@ -33,7 +33,7 @@ class DayRange:
 
 
 class WorkHours:
-    """Time range"""
+    """Time range, defined by start and end time"""
 
     def __init__(self, time_start, time_end):
         """
@@ -57,11 +57,11 @@ class WorkHours:
 
 
 class WeekdayWorkHours(WorkHours):
-    """Work schedule defined by day and time range"""
+    """Work schedule defined by day of the week and time range"""
 
     def __init__(self, weekday: int, time_start: time, time_end: time):
         """
-        Define work hours through weekday, and time range
+        Define work hours through day of the week, and time range
 
         :param weekday: day of the week, 0 - monday, 6 - sunday
         :param time_start: time of day inclusive
@@ -102,7 +102,7 @@ class WorkHoursWage(WorkHours):
 
     def get_wage(self, time_start: time, time_end: time) -> int:
         """
-        calculates amount of money based off of supplied schedule
+        Calculates amount of money based off of supplied schedule
 
         :param time_start: schedule start
         :param time_end: schedule end
@@ -127,14 +127,14 @@ class WorkHoursWage(WorkHours):
 
 
 class PayRate:
-    """Hourly wages in day range"""
+    """Hourly wages by days of the week"""
 
     def __init__(self, day_range: DayRange, hourly_wages: list[WorkHoursWage]):
         """
-        Create payrate defined by dayrange and hourly wages in those days
+        Create payrate for day range and define hourly wages
 
         :param day_range: positive dayrange
-        :param hourly_wages: wages per hour covering all 24hs
+        :param hourly_wages: wages per hour - must cover all 24hs
         """
 
         # order hourly wages
@@ -166,7 +166,7 @@ class PayRate:
 
     def calculate_salary(self, schedule: WeekdayWorkHours) -> int:
         """
-        calculate salary for supplied schedule
+        Calculate salary for supplied schedule
 
         :param schedule: worked days and hours
         :return: amount of money
@@ -206,13 +206,13 @@ class EmployeeSchedule:
 
 
 class Payroll:
-    """Payrates and employee schedules"""
+    """Holds pay rates and employee schedules"""
 
     def __init__(self, rates: list[PayRate]):
         """
-        Creates payroll defining payrates
+        Creates a payroll with the supplied pay rates
 
-        :param rates: list of payrates
+        :param rates: list of pay rates
         """
         # order rates by weekday
         rates.sort(key=lambda r: r.day_range.weekday_start)
@@ -237,7 +237,7 @@ class Payroll:
 
     def add_employee_schedule(self, schedule: EmployeeSchedule):
         """
-        adds employee schedule to payroll
+        Adds employee schedule to payroll
 
         :param schedule: employee schedule
         """
@@ -248,7 +248,7 @@ class Payroll:
 
     def get_employees_payroll(self) -> tuple[tuple[str, int], ...]:
         """
-        calculates employees salaries
+        Calculates employees salaries based on pay rates and schedules
 
         :returns: tuple of employee-salary tuples
         """
