@@ -16,7 +16,8 @@ The support module implements the following architecture
 My approach involved, first, reading and organizing the exercise prompt `exercise.md`,<br>
 Then, I proceeded to design the architecture to give support to the data involved.<br>
 After having finished designing, I proceeded to plan the implementation steps, organizing them into issues.<br>
-Implementation was test-driven, working with the supplied use cases along new data.
+Implementation was test-driven, working with the supplied use cases along new data.<br>
+After implementation, I did exploratory testing to further test coverage.
 
 ## How to run
 Its input is a txt file containing at least 5 employee schedules.<br>
