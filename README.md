@@ -9,6 +9,9 @@ The solution consists of the main script `acme_payroll.py` and a support module 
 
 The support module implements the following architecture
 
+![image](https://user-images.githubusercontent.com/49913638/166165961-58423b71-b7fe-4c5a-bf64-523189bf2065.png)
+
+
 ## Approach and methodology
 My approach involved, first, reading and organizing the exercise prompt `exercise.md`,<br>
 Then, I proceeded to design the architecture to give support to the data involved.<br>
